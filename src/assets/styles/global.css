@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+    color: #1c1b1f;
+    background-color: #f5f5ff;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cac4d0;
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9e99a8;
+  }
+
+  /* Remove inner outline on Firefox */
+  select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #1c1b1f;
+  }
+}
+
+@layer components {
+  /* ── Field ── */
+  .field-label {
+    @apply block text-2xs font-semibold tracking-wider uppercase text-mat-on-surface-var mb-1.5 select-none;
+  }
+
+  .field-base {
+    @apply w-full bg-white border border-mat-outline rounded text-sm text-mat-on-surface
+      placeholder:text-mat-muted
+      transition-[border-color,box-shadow] duration-fast ease-material
+      outline-none
+      shadow-field
+      disabled:bg-mat-bg disabled:cursor-not-allowed disabled:text-mat-muted;
+  }
+
+  .field-base:focus {
+    @apply border-mat-primary shadow-field-focus;
+  }
+
+  .field-base.field-error {
+    @apply border-mat-error;
+  }
+
+  .field-base.field-error:focus {
+    box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+  }
+
+  /* ── Card ── */
+  .card {
+    @apply bg-mat-surface rounded-lg shadow-card;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    @apply border-0 border-t border-mat-outline-var my-4;
+  }
+
+  /* ── Popup shell ── */
+  .popup-root {
+    @apply flex flex-col min-h-screen;
+  }
+
+  /* ── Header ── */
+  .popup-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    @apply flex items-center gap-3 px-4 py-3 sticky top-0 z-10;
+  }
+
+  /* ── Icon button ── */
+  .icon-btn {
+    @apply flex items-center justify-center w-8 h-8 rounded-full text-white/70
+      hover:text-white hover:bg-white/15
+      transition-all duration-fast ease-material
+      focus:outline-none focus:ring-2 focus:ring-white/40;
+  }
+
+  /* ── Chip (priority/type inline) ── */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-semibold;
+  }
+
+  /* ── Screenshot zone ── */
+  .screenshot-zone {
+    @apply flex flex-col items-center justify-center gap-2 w-full py-5
+      border-2 border-dashed border-mat-outline rounded-lg
+      bg-mat-surface cursor-pointer select-none
+      transition-all duration-base ease-material
+      hover:border-mat-primary hover:bg-mat-primary-container/30;
+  }
+
+  .screenshot-zone.is-capturing {
+    @apply border-mat-primary bg-mat-primary-container/20 cursor-wait;
+  }
+}
+
+@layer utilities {
+  /* Declare custom font-size tokens so @apply can resolve them */
+  .text-2xs {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
