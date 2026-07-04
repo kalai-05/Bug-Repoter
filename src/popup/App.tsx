@@ -11,6 +11,7 @@ import { useEnvironment } from '../hooks/useEnvironment';
 import { useAuth } from '../hooks/useAuth';
 import { useClickUpFormData } from '../hooks/useClickUpFormData';
 import { getStorageItem } from '../utils/storage.utils';
+import type { Platform } from '../types/chrome.types';
 
 function LoadingSpinner() {
   return (
@@ -26,6 +27,7 @@ function LoadingSpinner() {
 
 export function App() {
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
+  const [platform, setPlatform] = useState<Platform>('clickup');
   const [showHistory, setShowHistory] = useState(false);
 
   const { user } = useAuth();
@@ -40,25 +42,41 @@ export function App() {
     clear,
   } = useScreenshot();
   const { info: envInfo } = useEnvironment();
-  const { tags: availableTags, members: availableMembers, isLoading: formDataLoading } = useClickUpFormData();
+  const { tags: availableTags, members: availableMembers, isLoading: formDataLoading } =
+    useClickUpFormData(platform === 'clickup');
 
   useEffect(() => {
-    void getStorageItem('clickupConfig').then((config) => {
-      setIsConfigured(Boolean(config?.apiToken && config.listId));
-    });
+    void (async () => {
+      const p = (await getStorageItem('platform')) ?? 'clickup';
+      setPlatform(p);
+
+      let configured = false;
+      if (p === 'clickup') {
+        const config = await getStorageItem('clickupConfig');
+        configured = Boolean(config?.apiToken && config.listId);
+      } else if (p === 'jira') {
+        const config = await getStorageItem('jiraConfig');
+        configured = Boolean(config?.baseUrl && config.email && config.apiToken && config.projectKey);
+      } else if (p === 'linear') {
+        const config = await getStorageItem('linearConfig');
+        configured = Boolean(config?.apiKey && config.teamId);
+      }
+      setIsConfigured(configured);
+    })();
   }, []);
 
   const openSettings = () => void chrome.runtime.openOptionsPage();
 
   const renderBody = () => {
     if (isConfigured === null) return <LoadingSpinner />;
-    if (!isConfigured) return <ConfigWarningView />;
+    if (!isConfigured) return <ConfigWarningView platform={platform} />;
     if (status === 'success' && result)
-      return <SuccessView result={result} onReset={() => { reset(); clear(); }} />;
+      return <SuccessView result={result} platform={platform} onReset={() => { reset(); clear(); }} />;
     if (status === 'error' && error) return <ErrorView message={error} onRetry={reset} />;
 
     return (
       <BugForm
+        platform={platform}
         form={form}
         screenshotResult={screenshotResult}
         annotatedScreenshot={annotated}
@@ -85,6 +103,7 @@ export function App() {
         onHistoryClick={() => setShowHistory((v) => !v)}
         showingHistory={showHistory}
         user={user}
+        platform={platform}
       />
       <main className="flex-1 bg-mat-bg overflow-hidden">
         {showHistory ? <HistoryView /> : renderBody()}

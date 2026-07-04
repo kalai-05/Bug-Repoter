@@ -12,6 +12,7 @@ export default {
           'on-primary': '#FFFFFF',
           'on-primary-container': '#1A1A6E',
           surface: '#FFFFFF',
+          'surface-var': '#EDE9FE',
           bg: '#F5F5FF',
           'on-surface': '#1C1B1F',
           'on-surface-var': '#49454F',

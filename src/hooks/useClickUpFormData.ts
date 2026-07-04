@@ -9,12 +9,17 @@ export interface ClickUpFormData {
   isLoading: boolean;
 }
 
-export function useClickUpFormData(): ClickUpFormData {
+export function useClickUpFormData(enabled = true): ClickUpFormData {
   const [tags, setTags] = useState<ClickUpTag[]>([]);
   const [members, setMembers] = useState<ClickUpMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     void (async () => {
       const config = await getStorageItem('clickupConfig');
       if (!config?.apiToken || !config.spaceId || !config.listId) {

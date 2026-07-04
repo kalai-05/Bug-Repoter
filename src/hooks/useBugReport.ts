@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { clickUpService } from '../services/clickup/clickup.service';
+import { reporterService } from '../services/reporter.service';
 import { historyService } from '../services/history.service';
 import { ClickUpError } from '../types';
 import { notifyTaskCreated, notifyTaskFailed } from '../utils/notifications.utils';
@@ -102,7 +102,7 @@ export function useBugReport(): UseBugReportReturn {
           ...(googleUser ? { createdBy: googleUser.name ?? googleUser.email } : {}),
         };
 
-        const reportResult = await clickUpService.submitBugReport(report);
+        const reportResult = await reporterService.submitBugReport(report);
         setResult(reportResult);
         setStatus('success');
         notifyTaskCreated(report.title, reportResult.taskUrl);

@@ -9,6 +9,7 @@ import { AssigneePicker } from '../AssigneePicker/AssigneePicker';
 import { validateBugReport, getFieldError } from '../../utils/validation.utils';
 import type { BugReportFormState, BugPriority, BugType, ClickUpTag, ClickUpMember } from '../../types';
 import type { ScreenshotCaptureError, ScreenshotResult } from '../../types/screenshot.types';
+import type { Platform } from '../../types/chrome.types';
 
 /* ── Option lists ────────────────────────────────────────────── */
 
@@ -74,6 +75,7 @@ function SettingsRow({ onClick }: { onClick: () => void }) {
 /* ── BugForm ─────────────────────────────────────────────────── */
 
 export interface BugFormProps {
+  platform?: Platform;
   form: BugReportFormState;
   /** Full screenshot result including base64, dimensions, and size metadata */
   screenshotResult: ScreenshotResult | null;
@@ -100,6 +102,7 @@ export interface BugFormProps {
 }
 
 export function BugForm({
+  platform = 'clickup',
   form,
   screenshotResult,
   annotatedScreenshot,
@@ -207,23 +210,25 @@ export function BugForm({
             />
           </div>
 
-          {/* Tags — fetched from ClickUp space */}
-          <TagPicker
-            label="Tags"
-            selected={form.tags}
-            available={availableTags}
-            isLoading={formDataLoading}
-            onChange={(tags) => onFieldChange('tags', tags)}
-          />
+          {platform !== 'linear' && (
+            <TagPicker
+              label="Tags"
+              selected={form.tags}
+              available={availableTags}
+              isLoading={formDataLoading}
+              onChange={(tags) => onFieldChange('tags', tags)}
+            />
+          )}
 
-          {/* Assignees — fetched from ClickUp workspace */}
-          <AssigneePicker
-            label="Assignees"
-            selected={form.assignees}
-            members={availableMembers}
-            isLoading={formDataLoading}
-            onChange={(ids) => onFieldChange('assignees', ids)}
-          />
+          {platform === 'clickup' && (
+            <AssigneePicker
+              label="Assignees"
+              selected={form.assignees}
+              members={availableMembers}
+              isLoading={formDataLoading}
+              onChange={(ids) => onFieldChange('assignees', ids)}
+            />
+          )}
         </div>
 
         {/* ── Screenshot section ── */}

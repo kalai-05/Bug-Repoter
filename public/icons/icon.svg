@@ -1,67 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <!-- Background: indigo rounded square with subtle gradient -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#4f46e5"/>
+      <stop offset="0%" stop-color="#1a1363"/>
+      <stop offset="55%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
     </linearGradient>
-    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#e8e7ff" stop-opacity="1"/>
-    </linearGradient>
-    <clipPath id="clip">
-      <rect width="128" height="128" rx="26"/>
-    </clipPath>
+    <radialGradient id="glow" cx="30%" cy="28%" r="60%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="128" height="128" rx="26" fill="url(#bg)"/>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- Gloss overlay -->
+  <rect width="128" height="128" rx="28" fill="url(#glow)"/>
 
-  <!-- Subtle inner glow overlay -->
-  <rect width="128" height="128" rx="26" fill="white" opacity="0.06"/>
+  <!-- Antennae -->
+  <line x1="50" y1="29" x2="34" y2="11" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.90"/>
+  <line x1="78" y1="29" x2="94" y2="11" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.90"/>
+  <circle cx="32" cy="9"  r="5.5" fill="white" opacity="0.90"/>
+  <circle cx="96" cy="9"  r="5.5" fill="white" opacity="0.90"/>
 
-  <!-- Bug antennae (behind head) -->
-  <line x1="52" y1="27" x2="36" y2="10" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
-  <line x1="76" y1="27" x2="92" y2="10" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
-
-  <!-- Antenna tips (dots) -->
-  <circle cx="34" cy="9" r="4" fill="white" opacity="0.9"/>
-  <circle cx="94" cy="9" r="4" fill="white" opacity="0.9"/>
-
-  <!-- Bug head -->
-  <ellipse cx="64" cy="36" rx="18" ry="16" fill="url(#bodyGrad)"/>
+  <!-- Head -->
+  <circle cx="64" cy="38" r="19" fill="white"/>
 
   <!-- Eyes -->
-  <circle cx="56" cy="34" r="4.5" fill="#4f46e5"/>
-  <circle cx="72" cy="34" r="4.5" fill="#4f46e5"/>
-  <!-- Eye shine -->
-  <circle cx="57.5" cy="32.5" r="1.5" fill="white" opacity="0.8"/>
-  <circle cx="73.5" cy="32.5" r="1.5" fill="white" opacity="0.8"/>
+  <circle cx="55" cy="36" r="5" fill="#4f46e5"/>
+  <circle cx="73" cy="36" r="5" fill="#4f46e5"/>
+  <circle cx="56.5" cy="34.5" r="2" fill="white" opacity="0.75"/>
+  <circle cx="74.5" cy="34.5" r="2" fill="white" opacity="0.75"/>
 
-  <!-- Bug body -->
-  <ellipse cx="64" cy="76" rx="25" ry="32" fill="url(#bodyGrad)"/>
+  <!-- Body -->
+  <ellipse cx="64" cy="82" rx="26" ry="33" fill="white"/>
 
-  <!-- Body center line (shell split) -->
-  <line x1="64" y1="46" x2="64" y2="107" stroke="#c7c8f0" stroke-width="1.5" opacity="0.7"/>
-
-  <!-- Body pattern dots -->
-  <circle cx="56" cy="62" r="3" fill="#c7c8f0" opacity="0.6"/>
-  <circle cx="72" cy="62" r="3" fill="#c7c8f0" opacity="0.6"/>
-  <circle cx="56" cy="78" r="3" fill="#c7c8f0" opacity="0.6"/>
-  <circle cx="72" cy="78" r="3" fill="#c7c8f0" opacity="0.6"/>
-  <circle cx="56" cy="94" r="3" fill="#c7c8f0" opacity="0.6"/>
-  <circle cx="72" cy="94" r="3" fill="#c7c8f0" opacity="0.6"/>
-
-  <!-- Neck connector -->
-  <rect x="50" y="50" width="28" height="10" rx="4" fill="url(#bodyGrad)"/>
+  <!-- Body split line -->
+  <line x1="64" y1="56" x2="64" y2="113" stroke="#c4c5f0" stroke-width="2" opacity="0.55"/>
 
   <!-- Left legs -->
-  <line x1="40" y1="63" x2="20" y2="56" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
-  <line x1="40" y1="76" x2="18" y2="76" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
-  <line x1="40" y1="90" x2="20" y2="97" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+  <line x1="38" y1="68" x2="17" y2="60" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
+  <line x1="38" y1="82" x2="16" y2="82" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
+  <line x1="38" y1="96" x2="17" y2="104" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
 
   <!-- Right legs -->
-  <line x1="88" y1="63" x2="108" y2="56" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
-  <line x1="88" y1="76" x2="110" y2="76" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
-  <line x1="88" y1="90" x2="108" y2="97" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+  <line x1="90" y1="68" x2="111" y2="60" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
+  <line x1="90" y1="82" x2="112" y2="82" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
+  <line x1="90" y1="96" x2="111" y2="104" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.92"/>
 </svg>

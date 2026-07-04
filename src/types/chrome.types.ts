@@ -29,7 +29,10 @@ export interface PageMetadataResponse {
   userAgent: string;
 }
 
+export type Platform = 'clickup' | 'jira' | 'linear';
+
 export interface StorageData {
+  platform?: Platform;
   clickupConfig?: {
     apiToken: string;
     workspaceId: string;
@@ -38,6 +41,16 @@ export interface StorageData {
     folderId: string;
     listId: string;
     defaultStatus?: string;
+  };
+  jiraConfig?: {
+    baseUrl: string;
+    email: string;
+    apiToken: string;
+    projectKey: string;
+  };
+  linearConfig?: {
+    apiKey: string;
+    teamId: string;
   };
   driveConfig?: {
     folderId: string | null;

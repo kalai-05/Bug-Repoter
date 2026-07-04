@@ -35,11 +35,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #cac4d0;
+    background: #c4b5fd;
     border-radius: 99px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #9e99a8;
+    background: #8b5cf6;
   }
 
   /* Remove inner outline on Firefox */
@@ -56,7 +56,7 @@
   }
 
   .field-base {
-    @apply w-full bg-white border border-mat-outline rounded text-sm text-mat-on-surface
+    @apply w-full bg-white border border-mat-outline rounded-lg text-sm text-mat-on-surface
       placeholder:text-mat-muted
       transition-[border-color,box-shadow] duration-fast ease-material
       outline-none
@@ -78,7 +78,7 @@
 
   /* ── Card ── */
   .card {
-    @apply bg-mat-surface rounded-lg shadow-card;
+    @apply bg-mat-surface rounded-xl shadow-card border border-mat-outline-var/60;
   }
 
   /* ── Divider ── */
@@ -93,16 +93,16 @@
 
   /* ── Header ── */
   .popup-header {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    @apply flex items-center gap-3 px-4 py-3 sticky top-0 z-10;
+    background: linear-gradient(145deg, #1a1363 0%, #312e81 35%, #4f46e5 70%, #7c3aed 100%);
+    @apply flex items-center gap-3 px-4 py-3.5 sticky top-0 z-10;
   }
 
   /* ── Icon button ── */
   .icon-btn {
-    @apply flex items-center justify-center w-8 h-8 rounded-full text-white/70
+    @apply flex items-center justify-center w-8 h-8 rounded-lg text-white/65
       hover:text-white hover:bg-white/15
       transition-all duration-fast ease-material
-      focus:outline-none focus:ring-2 focus:ring-white/40;
+      focus:outline-none focus:ring-2 focus:ring-white/30;
   }
 
   /* ── Chip (priority/type inline) ── */
@@ -113,7 +113,7 @@
   /* ── Screenshot zone ── */
   .screenshot-zone {
     @apply flex flex-col items-center justify-center gap-2 w-full py-5
-      border-2 border-dashed border-mat-outline rounded-lg
+      border-2 border-dashed border-mat-outline rounded-xl
       bg-mat-surface cursor-pointer select-none
       transition-all duration-base ease-material
       hover:border-mat-primary hover:bg-mat-primary-container/30;
@@ -125,7 +125,6 @@
 }
 
 @layer utilities {
-  /* Declare custom font-size tokens so @apply can resolve them */
   .text-2xs {
     font-size: 10px;
     line-height: 14px;

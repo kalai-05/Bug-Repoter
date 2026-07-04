@@ -3,6 +3,7 @@ import { useSettings } from '../hooks/useSettings';
 import type { SettingsFormState } from '../hooks/useSettings';
 import { useAuth } from '../hooks/useAuth';
 import type { GoogleUser } from '../types/auth.types';
+import type { Platform } from '../types/chrome.types';
 
 /* ── Icons ─────────────────────────────────────────────────── */
 
@@ -10,6 +11,24 @@ function ClickUpIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M3 12l4.5 4.5L12 6l4.5 6.5L21 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function JiraIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2L2 12l10 10 10-10L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M12 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function LinearIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+      <path d="M7 12h10M12 7v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   );
 }
@@ -69,6 +88,181 @@ function TrashIcon() {
   );
 }
 
+/* ── Field tooltip help ─────────────────────────────────────── */
+
+interface FieldHelp {
+  title: string;
+  steps: string[];
+}
+
+const CLICKUP_HELP = {
+  apiToken: {
+    title: 'How to get your API Token',
+    steps: [
+      'Click your avatar at the bottom-left in ClickUp',
+      'Go to Settings → Apps',
+      'Under "API Token" click Generate (or copy existing)',
+      'Paste the token here',
+    ],
+  },
+  workspaceId: {
+    title: 'How to find your Workspace ID',
+    steps: [
+      'Open ClickUp in your browser',
+      'Look at the address bar URL',
+      'Format: app.clickup.com/{ID}/home',
+      'Copy the number right after the domain',
+    ],
+  },
+  spaceId: {
+    title: 'How to find your Space ID',
+    steps: [
+      'Right-click any Space in the left sidebar',
+      'Select "Copy link"',
+      'Paste the link somewhere — look at the end',
+      'The last number is your Space ID',
+      'Example: …/s/90120056789 → ID is 90120056789',
+    ],
+  },
+  folderId: {
+    title: 'How to find your Folder ID (optional)',
+    steps: [
+      'Right-click any Folder in the left sidebar',
+      'Select "Copy link"',
+      'The last number in the URL is your Folder ID',
+      'Leave blank if your lists are directly in a Space',
+    ],
+  },
+  listId: {
+    title: 'How to find your List ID',
+    steps: [
+      'Right-click any List in the left sidebar',
+      'Select "Copy link"',
+      'Paste the link and look at the end',
+      'The last number is your List ID',
+      'Example: …/l/901205678901 → ID is 901205678901',
+    ],
+  },
+} satisfies Record<string, FieldHelp>;
+
+const JIRA_HELP = {
+  baseUrl: {
+    title: 'Your Jira Base URL',
+    steps: [
+      'Open Jira in your browser',
+      'Look at the URL bar',
+      'Copy everything up to and including ".atlassian.net"',
+      'Example: https://yourcompany.atlassian.net',
+      'Do NOT include any path after the domain',
+    ],
+  },
+  email: {
+    title: 'Your Atlassian Email',
+    steps: [
+      'Use the email address you log into Jira with',
+      'To confirm: click your avatar in Jira → top of the menu',
+    ],
+  },
+  apiToken: {
+    title: 'How to create a Jira API Token',
+    steps: [
+      'Go to id.atlassian.com in your browser',
+      'Click Security in the left menu',
+      'Click "Create and manage API tokens"',
+      'Click "Create API token" and give it a name',
+      'Copy the token immediately — it won\'t show again',
+    ],
+  },
+  projectKey: {
+    title: 'Where to find your Project Key',
+    steps: [
+      'Open any issue inside your Jira project',
+      'Look at the issue number (e.g. "BUG-123")',
+      'The letters before the dash are the Project Key',
+      'Example: "BUG" from "BUG-123"',
+      'Keys are typically 2–5 uppercase letters',
+    ],
+  },
+} satisfies Record<string, FieldHelp>;
+
+const LINEAR_HELP = {
+  apiKey: {
+    title: 'How to create a Linear API Key',
+    steps: [
+      'Open Linear and click Settings (bottom-left gear)',
+      'Click API in the left sidebar',
+      'Under Personal API Keys, click "Create key"',
+      'Give it a label (e.g. "Bug Reporter") and click Create',
+      'Copy the key immediately — it won\'t show again',
+    ],
+  },
+  teamId: {
+    title: 'How to find your Team Key',
+    steps: [
+      'Open Linear and go to Settings',
+      'Click Teams in the left sidebar',
+      'Click on your team name',
+      'Look at the browser URL — it ends with your Team Key',
+      'Example: linear.app/…/settings/teams/BUG → Key is BUG',
+      'Paste that short key here (e.g. BUG, ENG, DEV)',
+    ],
+  },
+} satisfies Record<string, FieldHelp>;
+
+function TooltipHelp({ help }: { help: FieldHelp }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative inline-flex items-center">
+      <button
+        type="button"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center justify-center w-4 h-4 rounded-full text-mat-muted hover:text-mat-primary transition-colors focus:outline-none"
+        aria-label="How to find this value"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-64 rounded-xl border border-mat-outline-var bg-white shadow-card-hover p-3.5 flex flex-col gap-2.5"
+          role="tooltip"
+        >
+          {/* Arrow */}
+          <div
+            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-l border-t border-mat-outline-var"
+            style={{ transform: 'translateY(-50%) rotate(-45deg)' }}
+          />
+          {/* Title */}
+          <p className="text-xs font-bold text-mat-on-surface leading-snug">{help.title}</p>
+          {/* Steps */}
+          <ol className="flex flex-col gap-1.5">
+            {help.steps.map((step, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span
+                  className="flex-shrink-0 w-4 h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center mt-0.5"
+                  style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-xs text-mat-on-surface-var leading-snug">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Field components ───────────────────────────────────────── */
 
 interface FieldProps {
@@ -76,21 +270,25 @@ interface FieldProps {
   hint?: string | undefined;
   required?: boolean | undefined;
   error?: string | undefined;
+  help?: FieldHelp | undefined;
   children: React.ReactNode;
 }
 
-function Field({ label, hint, required, error, children }: FieldProps) {
+function Field({ label, hint, required, error, help, children }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="field-label flex items-center gap-1">
-        {label}
-        {required && <span className="text-mat-error" aria-hidden="true">*</span>}
-        {hint && !required && (
-          <span className="ml-1 normal-case tracking-normal text-mat-muted font-normal">
-            — {hint}
-          </span>
-        )}
-      </label>
+      <div className="flex items-center gap-1.5">
+        <label className="field-label mb-0 flex items-center gap-1 flex-1">
+          {label}
+          {required && <span className="text-mat-error" aria-hidden="true">*</span>}
+          {hint && !required && (
+            <span className="ml-1 normal-case tracking-normal text-mat-muted font-normal">
+              — {hint}
+            </span>
+          )}
+        </label>
+        {help && <TooltipHelp help={help} />}
+      </div>
       {children}
       {error && (
         <p className="flex items-center gap-1 text-2xs text-mat-error font-medium">
@@ -112,12 +310,13 @@ interface TextInputProps {
   autoComplete?: string;
   spellCheck?: boolean;
   inputMode?: React.InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  type?: string;
 }
 
-function TextInput({ value, onChange, placeholder, hasError, autoComplete = 'off', spellCheck = false, inputMode }: TextInputProps) {
+function TextInput({ value, onChange, placeholder, hasError, autoComplete = 'off', spellCheck = false, inputMode, type = 'text' }: TextInputProps) {
   return (
     <input
-      type="text"
+      type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
@@ -175,9 +374,8 @@ interface SectionProps {
 
 function SettingsSection({ icon, title, description, accent, children }: SectionProps) {
   return (
-    <section className="card overflow-hidden">
-      {/* Section header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-mat-outline-var" style={{ background: accent }}>
+    <section className="card">
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-mat-outline-var rounded-t-xl overflow-hidden" style={{ background: accent }}>
         <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/90 text-mat-primary shadow-sm">
           {icon}
         </span>
@@ -186,10 +384,44 @@ function SettingsSection({ icon, title, description, accent, children }: Section
           <p className="text-2xs text-mat-on-surface-var mt-0.5">{description}</p>
         </div>
       </div>
-
-      {/* Section body */}
       <div className="px-6 py-5 flex flex-col gap-4">{children}</div>
     </section>
+  );
+}
+
+/* ── Platform tab selector ──────────────────────────────────── */
+
+interface PlatformTabsProps {
+  value: Platform;
+  onChange: (p: Platform) => void;
+}
+
+const PLATFORMS: Array<{ id: Platform; label: string; icon: React.ReactNode }> = [
+  { id: 'clickup', label: 'ClickUp', icon: <ClickUpIcon /> },
+  { id: 'jira', label: 'Jira', icon: <JiraIcon /> },
+  { id: 'linear', label: 'Linear', icon: <LinearIcon /> },
+];
+
+function PlatformTabs({ value, onChange }: PlatformTabsProps) {
+  return (
+    <div className="flex gap-2 p-1 rounded-xl bg-mat-surface-var border border-mat-outline-var">
+      {PLATFORMS.map((p) => (
+        <button
+          key={p.id}
+          type="button"
+          onClick={() => onChange(p.id)}
+          className={[
+            'flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-semibold transition-all',
+            value === p.id
+              ? 'bg-white shadow-sm text-mat-primary'
+              : 'text-mat-muted hover:text-mat-on-surface',
+          ].join(' ')}
+        >
+          {p.icon}
+          {p.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -259,7 +491,6 @@ function GoogleAccountSection({
           Checking sign-in status…
         </div>
       ) : user ? (
-        /* ── Signed-in state ── */
         <div className="flex items-center gap-4 p-4 rounded-xl bg-mat-bg border border-mat-outline-var">
           <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-mat-outline-var shrink-0 bg-mat-primary-container">
             {user.picture && (
@@ -306,7 +537,6 @@ function GoogleAccountSection({
           </button>
         </div>
       ) : (
-        /* ── Signed-out state ── */
         <div className="flex flex-col items-center gap-4 py-4">
           <div className="flex flex-col items-center gap-1 text-center">
             <p className="text-sm text-mat-on-surface-var font-medium">No account connected</p>
@@ -359,20 +589,149 @@ function GoogleAccountSection({
   );
 }
 
+/* ── Platform config sections ───────────────────────────────── */
+
+interface ConfigSectionProps {
+  errors: import('../hooks/useSettings').SettingsValidationErrors;
+  f: (field: keyof SettingsFormState) => { value: string; onChange: (v: string) => void; hasError: boolean };
+}
+
+function ClickUpConfigSection({ errors, f }: ConfigSectionProps) {
+  return (
+    <SettingsSection
+      icon={<ClickUpIcon />}
+      title="ClickUp Integration"
+      description="Connect your ClickUp workspace to automatically create bug tickets."
+      accent="#EEF0FF"
+    >
+      <Field
+        label="API Token"
+        required
+        error={errors.clickupApiToken}
+        help={CLICKUP_HELP.apiToken}
+      >
+        <TokenInput
+          {...f('clickupApiToken')}
+          placeholder="pk_XXXXXXXXXX_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        />
+      </Field>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Workspace ID" required error={errors.clickupWorkspaceId} help={CLICKUP_HELP.workspaceId}>
+          <TextInput {...f('clickupWorkspaceId')} placeholder="e.g. 9012345678" inputMode="numeric" />
+        </Field>
+        <Field label="Space ID" required error={errors.clickupSpaceId} help={CLICKUP_HELP.spaceId}>
+          <TextInput {...f('clickupSpaceId')} placeholder="e.g. 90120056789" inputMode="numeric" />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Folder ID" hint="optional" error={errors.clickupFolderId} help={CLICKUP_HELP.folderId}>
+          <TextInput {...f('clickupFolderId')} placeholder="e.g. 90130056789" inputMode="numeric" />
+        </Field>
+        <Field label="List ID" required error={errors.clickupListId} help={CLICKUP_HELP.listId}>
+          <TextInput {...f('clickupListId')} placeholder="e.g. 901205678901" inputMode="numeric" />
+        </Field>
+      </div>
+    </SettingsSection>
+  );
+}
+
+function JiraConfigSection({ errors, f }: ConfigSectionProps) {
+  return (
+    <SettingsSection
+      icon={<JiraIcon />}
+      title="Jira Integration"
+      description="Connect your Jira project to create bug issues automatically."
+      accent="#E8F0FE"
+    >
+      <Field
+        label="Jira Base URL"
+        required
+        error={errors.jiraBaseUrl}
+        help={JIRA_HELP.baseUrl}
+      >
+        <TextInput
+          {...f('jiraBaseUrl')}
+          placeholder="https://yourcompany.atlassian.net"
+          type="url"
+        />
+      </Field>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Email" required error={errors.jiraEmail} help={JIRA_HELP.email}>
+          <TextInput
+            {...f('jiraEmail')}
+            placeholder="you@company.com"
+            type="email"
+            autoComplete="email"
+          />
+        </Field>
+        <Field label="Project Key" required error={errors.jiraProjectKey} help={JIRA_HELP.projectKey}>
+          <TextInput {...f('jiraProjectKey')} placeholder="e.g. BUG, ENG" />
+        </Field>
+      </div>
+
+      <Field
+        label="API Token"
+        required
+        error={errors.jiraApiToken}
+        help={JIRA_HELP.apiToken}
+      >
+        <TokenInput {...f('jiraApiToken')} placeholder="ATATT3xFfGF0..." />
+      </Field>
+    </SettingsSection>
+  );
+}
+
+function LinearConfigSection({ errors, f }: ConfigSectionProps) {
+  return (
+    <SettingsSection
+      icon={<LinearIcon />}
+      title="Linear Integration"
+      description="Connect your Linear team to create bug issues automatically."
+      accent="#F0EDFF"
+    >
+      <Field
+        label="API Key"
+        required
+        error={errors.linearApiKey}
+        help={LINEAR_HELP.apiKey}
+      >
+        <TokenInput {...f('linearApiKey')} placeholder="lin_api_XXXXXXXXXX..." />
+      </Field>
+
+      <Field
+        label="Team Key"
+        required
+        hint="from Settings → Teams URL"
+        error={errors.linearTeamId}
+        help={LINEAR_HELP.teamId}
+      >
+        <TextInput {...f('linearTeamId')} placeholder="e.g. BUG, ENG, DEV" />
+      </Field>
+    </SettingsSection>
+  );
+}
+
 /* ── Main OptionsApp ────────────────────────────────────────── */
 
 export function OptionsApp() {
   const { user, isLoading: authLoading, isAuthenticating, error: authError, login, logout, clearError } = useAuth();
-  const { form, errors, status, saveError, isDirty, updateField, save, clearAll } = useSettings();
+  const { form, errors, status, saveError, isDirty, updateField, switchPlatform, save, clearAll } = useSettings();
 
   const f = (field: keyof SettingsFormState) => ({
-    value: form[field],
+    value: form[field] as string,
     onChange: (v: string) => updateField(field, v),
     hasError: Boolean(errors[field]),
   });
 
   const isLoading = status === 'loading';
   const isSaving = status === 'saving';
+
+  const handlePlatformChange = (p: Platform) => {
+    void switchPlatform(p);
+  };
 
   return (
     <div className="min-h-screen bg-mat-bg">
@@ -386,7 +745,7 @@ export function OptionsApp() {
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
           <div>
-            <h1 className="text-white font-bold text-base leading-tight">ClickUp Bug Reporter</h1>
+            <h1 className="text-white font-bold text-base leading-tight">Bug Reporter</h1>
             <p className="text-white/65 text-xs">Settings &amp; Configuration</p>
           </div>
         </div>
@@ -412,65 +771,22 @@ export function OptionsApp() {
               onClearError={clearError}
             />
 
-            {/* ── ClickUp section ── */}
-            <SettingsSection
-              icon={<ClickUpIcon />}
-              title="ClickUp Integration"
-              description="Connect your ClickUp workspace to automatically create bug tickets."
-              accent="#EEF0FF"
-            >
-              <Field
-                label="API Token"
-                required
-                hint="Personal API token from ClickUp → Settings → Apps"
-                error={errors.clickupApiToken}
-              >
-                <TokenInput
-                  {...f('clickupApiToken')}
-                  placeholder="pk_XXXXXXXXXX_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                />
-              </Field>
+            {/* ── Platform selector ── */}
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-semibold text-mat-muted uppercase tracking-wider">Bug Tracking Platform</p>
+              <PlatformTabs value={form.platform} onChange={handlePlatformChange} />
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Workspace ID" required error={errors.clickupWorkspaceId}>
-                  <TextInput
-                    {...f('clickupWorkspaceId')}
-                    placeholder="e.g. 9012345678"
-                    inputMode="numeric"
-                  />
-                </Field>
-                <Field label="Space ID" required error={errors.clickupSpaceId}>
-                  <TextInput
-                    {...f('clickupSpaceId')}
-                    placeholder="e.g. 90120056789"
-                    inputMode="numeric"
-                  />
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Folder ID" hint="optional" error={errors.clickupFolderId}>
-                  <TextInput
-                    {...f('clickupFolderId')}
-                    placeholder="e.g. 90130056789"
-                    inputMode="numeric"
-                  />
-                </Field>
-                <Field label="List ID" required error={errors.clickupListId}>
-                  <TextInput
-                    {...f('clickupListId')}
-                    placeholder="e.g. 901205678901"
-                    inputMode="numeric"
-                  />
-                </Field>
-              </div>
-
-              {/* Help row */}
-              <p className="text-2xs text-mat-muted leading-relaxed">
-                Find IDs by right-clicking any item in ClickUp and choosing <strong>Copy link</strong>.
-                The numeric segment at the end of the URL is the ID.
-              </p>
-            </SettingsSection>
+            {/* ── Platform-specific config ── */}
+            {form.platform === 'clickup' && (
+              <ClickUpConfigSection errors={errors} f={f} />
+            )}
+            {form.platform === 'jira' && (
+              <JiraConfigSection errors={errors} f={f} />
+            )}
+            {form.platform === 'linear' && (
+              <LinearConfigSection errors={errors} f={f} />
+            )}
 
             {/* ── Actions ── */}
             <div className="flex items-center justify-between gap-4">
@@ -530,7 +846,6 @@ export function OptionsApp() {
               </div>
             )}
 
-            {/* Validation summary — show when there are errors after a save attempt */}
             {status !== 'saved' && Object.keys(errors).length > 0 && (
               <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-mat-error-container border border-mat-error/30">
                 <span className="text-mat-error mt-0.5"><AlertCircleIcon /></span>
