@@ -9,8 +9,6 @@ export interface SettingsFormState {
   clickupSpaceId: string;
   clickupFolderId: string;
   clickupListId: string;
-  googleClientId: string;
-  googleDriveFolderId: string;
 }
 
 export type SettingsValidationErrors = Partial<Record<keyof SettingsFormState, string>>;
@@ -36,8 +34,6 @@ const EMPTY: SettingsFormState = {
   clickupSpaceId: '',
   clickupFolderId: '',
   clickupListId: '',
-  googleClientId: '',
-  googleDriveFolderId: '',
 };
 
 /* ── Validation ─────────────────────────────────────────────── */
@@ -80,19 +76,6 @@ function validate(f: SettingsFormState): SettingsValidationErrors {
     e.clickupListId = 'Must be a numeric ClickUp ID';
   }
 
-  // Google Client ID — optional, validate format when filled
-  if (
-    f.googleClientId.trim() &&
-    !f.googleClientId.trim().endsWith('.apps.googleusercontent.com')
-  ) {
-    e.googleClientId = 'Must end with .apps.googleusercontent.com';
-  }
-
-  // Drive Folder ID — no format constraint, but trim whitespace check
-  if (f.googleDriveFolderId && f.googleDriveFolderId !== f.googleDriveFolderId.trim()) {
-    e.googleDriveFolderId = 'Must not contain leading or trailing spaces';
-  }
-
   return e;
 }
 
@@ -109,10 +92,7 @@ export function useSettings(): UseSettingsReturn {
   useEffect(() => {
     const load = async () => {
       try {
-        const [clickup, drive] = await Promise.all([
-          getStorageItem('clickupConfig'),
-          getStorageItem('driveConfig'),
-        ]);
+        const clickup = await getStorageItem('clickupConfig');
 
         const loaded: SettingsFormState = {
           clickupApiToken: clickup?.apiToken ?? '',
@@ -120,8 +100,6 @@ export function useSettings(): UseSettingsReturn {
           clickupSpaceId: clickup?.spaceId ?? '',
           clickupFolderId: clickup?.folderId ?? '',
           clickupListId: clickup?.listId ?? '',
-          googleClientId: drive?.clientId ?? '',
-          googleDriveFolderId: drive?.folderId ?? '',
         };
 
         setForm(loaded);
@@ -160,21 +138,13 @@ export function useSettings(): UseSettingsReturn {
     setErrors({});
 
     try {
-      const saves: Promise<void>[] = [
-        setStorageItem('clickupConfig', {
-          apiToken: form.clickupApiToken.trim(),
-          workspaceId: form.clickupWorkspaceId.trim(),
-          spaceId: form.clickupSpaceId.trim(),
-          folderId: form.clickupFolderId.trim(),
-          listId: form.clickupListId.trim(),
-        }),
-        setStorageItem('driveConfig', {
-          clientId: form.googleClientId.trim(),
-          folderId: form.googleDriveFolderId.trim() || null,
-        }),
-      ];
-
-      await Promise.all(saves);
+      await setStorageItem('clickupConfig', {
+        apiToken: form.clickupApiToken.trim(),
+        workspaceId: form.clickupWorkspaceId.trim(),
+        spaceId: form.clickupSpaceId.trim(),
+        folderId: form.clickupFolderId.trim(),
+        listId: form.clickupListId.trim(),
+      });
 
       const saved = { ...form };
       setSavedForm(saved);

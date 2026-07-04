@@ -1,6 +1,6 @@
 {
   "name": "clickup-bug-reporter",
-  "version": "1.0.0",
+  "version": "1.0.1ß",
   "private": true,
   "type": "module",
   "description": "A Chrome Extension to report bugs directly to ClickUp with screenshot support",

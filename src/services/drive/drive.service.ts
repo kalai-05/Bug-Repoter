@@ -95,10 +95,7 @@ class DriveService {
     }
 
     // Cache so subsequent uploads skip the search
-    await setStorageItem('driveConfig', {
-      clientId: config?.clientId ?? '',
-      folderId,
-    });
+    await setStorageItem('driveConfig', { folderId });
 
     return folderId;
   }

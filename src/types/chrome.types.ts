@@ -40,7 +40,6 @@ export interface StorageData {
     defaultStatus?: string;
   };
   driveConfig?: {
-    clientId: string;
     folderId: string | null;
   };
   recentReports?: Array<{

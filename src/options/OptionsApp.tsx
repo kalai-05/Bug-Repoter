@@ -25,16 +25,6 @@ function GoogleColorIcon() {
   );
 }
 
-function GoogleDriveIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12.18 2.25L8 9.75l4.18 7.5H20l-3.82-7.5z" />
-      <path d="M3 17.25l4.18-7.5 4 .5L7 17.25H3z" />
-      <path d="M7.18 17.25h9.64L20 21H4z" />
-    </svg>
-  );
-}
-
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -479,43 +469,6 @@ export function OptionsApp() {
               <p className="text-2xs text-mat-muted leading-relaxed">
                 Find IDs by right-clicking any item in ClickUp and choosing <strong>Copy link</strong>.
                 The numeric segment at the end of the URL is the ID.
-              </p>
-            </SettingsSection>
-
-            {/* ── Google Drive section ── */}
-            <SettingsSection
-              icon={<GoogleDriveIcon />}
-              title="Google Drive Integration"
-              description="Upload bug screenshots directly to Google Drive. Both fields are optional."
-              accent="#F0FDF4"
-            >
-              <Field
-                label="OAuth Client ID"
-                hint="optional"
-                error={errors.googleClientId}
-              >
-                <TextInput
-                  {...f('googleClientId')}
-                  placeholder="XXXXXXXXXXXX-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
-                  autoComplete="off"
-                />
-              </Field>
-
-              <Field
-                label="Drive Folder ID"
-                hint="optional — screenshots go to Drive root if blank"
-                error={errors.googleDriveFolderId}
-              >
-                <TextInput
-                  {...f('googleDriveFolderId')}
-                  placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
-                />
-              </Field>
-
-              <p className="text-2xs text-mat-muted leading-relaxed">
-                Create an OAuth 2.0 Client ID in{' '}
-                <strong>Google Cloud Console → APIs &amp; Services → Credentials</strong>.
-                Copy the Folder ID from the Drive URL after <code className="bg-mat-outline-var px-1 rounded">/folders/</code>.
               </p>
             </SettingsSection>
 
