@@ -8,7 +8,7 @@ import { TagPicker } from '../TagPicker/TagPicker';
 import { AssigneePicker } from '../AssigneePicker/AssigneePicker';
 import { validateBugReport, getFieldError } from '../../utils/validation.utils';
 import type { BugReportFormState, BugPriority, BugType, ClickUpTag, ClickUpMember } from '../../types';
-import type { ScreenshotCaptureError, ScreenshotResult } from '../../types/screenshot.types';
+import type { ScreenshotCaptureError, ScreenshotItem } from '../../types/screenshot.types';
 import type { Platform } from '../../types/chrome.types';
 
 /* ── Option lists ────────────────────────────────────────────── */
@@ -77,10 +77,7 @@ function SettingsRow({ onClick }: { onClick: () => void }) {
 export interface BugFormProps {
   platform?: Platform;
   form: BugReportFormState;
-  /** Full screenshot result including base64, dimensions, and size metadata */
-  screenshotResult: ScreenshotResult | null;
-  /** Annotated PNG data URL, replaces raw screenshot in submission when set */
-  annotatedScreenshot?: string | null;
+  screenshotItems: ScreenshotItem[];
   isCapturing: boolean;
   screenshotError: ScreenshotCaptureError | null;
   isSubmitting: boolean;
@@ -94,9 +91,8 @@ export interface BugFormProps {
     value: BugReportFormState[K],
   ) => void;
   onCapture: () => void;
-  onClearScreenshot: () => void;
-  onAnnotateScreenshot?: (dataUrl: string) => void;
-  /** Called with the screenshot data URL (or null) at submission time */
+  onRemoveScreenshot: (index: number) => void;
+  onAnnotateScreenshot: (index: number, dataUrl: string) => void;
   onSubmit: () => void;
   onSettings: () => void;
 }
@@ -104,8 +100,7 @@ export interface BugFormProps {
 export function BugForm({
   platform = 'clickup',
   form,
-  screenshotResult,
-  annotatedScreenshot,
+  screenshotItems,
   isCapturing,
   screenshotError,
   isSubmitting,
@@ -114,7 +109,7 @@ export function BugForm({
   formDataLoading,
   onFieldChange,
   onCapture,
-  onClearScreenshot,
+  onRemoveScreenshot,
   onAnnotateScreenshot,
   onSubmit,
   onSettings,
@@ -238,13 +233,12 @@ export function BugForm({
 
         <div className="px-4 pb-4">
           <ScreenshotPreview
-            result={screenshotResult}
-            annotatedDataUrl={annotatedScreenshot ?? null}
+            items={screenshotItems}
             isCapturing={isCapturing}
             error={screenshotError}
             onCapture={onCapture}
-            onClear={onClearScreenshot}
-            {...(onAnnotateScreenshot ? { onAnnotate: onAnnotateScreenshot } : {})}
+            onRemove={onRemoveScreenshot}
+            onAnnotate={onAnnotateScreenshot}
           />
         </div>
 

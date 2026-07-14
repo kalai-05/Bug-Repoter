@@ -10,6 +10,12 @@ export interface ScreenshotCaptureOptions {
 
 /* ── Successful result ──────────────────────────────────────── */
 
+export interface ScreenshotItem {
+  result: ScreenshotResult;
+  /** Annotated PNG data URL, set after user saves in the annotation editor */
+  annotated: string | null;
+}
+
 export interface ScreenshotResult {
   /** Full data URL: data:image/png;base64,<base64> */
   dataUrl: string;

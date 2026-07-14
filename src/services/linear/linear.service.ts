@@ -12,18 +12,21 @@ class LinearService {
       throw new Error('Linear is not configured. Open Settings to add your credentials.');
     }
 
-    // ── 1. Try Drive upload ──────────────────────────────────────────────
-    let screenshotUrl: string | null = null;
+    // ── 1. Try Drive upload for each screenshot ──────────────────────────
+    const driveUrls: string[] = [];
 
-    if (report.screenshot) {
+    for (let i = 0; i < report.screenshots.length; i++) {
+      const dataUrl = report.screenshots[i];
+      if (!dataUrl) continue;
       try {
-        const driveResult = await driveService.uploadScreenshot(report.screenshot, report.pageTitle);
-        screenshotUrl = driveResult.publicUrl;
+        const driveResult = await driveService.uploadScreenshot(dataUrl, report.pageTitle);
+        driveUrls.push(driveResult.publicUrl);
         notifyUploadComplete(driveResult.fileName);
       } catch (err) {
         if (!(err instanceof DriveUploadError && err.code === 'NOT_AUTHENTICATED')) {
           notifyUploadFailed(err instanceof DriveUploadError ? err.userMessage : undefined);
         }
+        break;
       }
     }
 
@@ -57,8 +60,11 @@ class LinearService {
       parts.push(`## Environment\n\n${envLines.join('\n')}`);
     }
 
-    if (screenshotUrl) {
-      parts.push(`## Screenshot\n\n![Screenshot](${screenshotUrl})`);
+    if (driveUrls.length > 0) {
+      const imgLines = driveUrls.map((url, i) =>
+        driveUrls.length > 1 ? `![Screenshot ${i + 1}](${url})` : `![Screenshot](${url})`,
+      );
+      parts.push(`## Screenshots\n\n${imgLines.join('\n\n')}`);
     }
 
     const meta: string[] = [];
@@ -77,7 +83,7 @@ class LinearService {
       taskId: issue.identifier,
       taskUrl: issue.url,
       createdAt: new Date().toISOString(),
-      screenshotUrl,
+      screenshotUrl: driveUrls[0] ?? null,
     };
   }
 }

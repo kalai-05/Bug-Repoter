@@ -36,7 +36,7 @@ interface UseBugReportReturn {
   result: BugReportResult | null;
   error: string | null;
   updateField: <K extends keyof BugReportFormState>(field: K, value: BugReportFormState[K]) => void;
-  submit: (screenshot: string | null, env?: EnvironmentInfo | null) => Promise<void>;
+  submit: (screenshots: string[], env?: EnvironmentInfo | null) => Promise<void>;
   reset: () => void;
 }
 
@@ -54,7 +54,7 @@ export function useBugReport(): UseBugReportReturn {
   );
 
   const submit = useCallback(
-    async (screenshot: string | null, env: EnvironmentInfo | null = null) => {
+    async (screenshots: string[], env: EnvironmentInfo | null = null) => {
       const { valid, errors } = validateBugReport(form);
       if (!valid) {
         setError(errors[0]?.message ?? 'Validation failed');
@@ -93,8 +93,7 @@ export function useBugReport(): UseBugReportReturn {
           pageUrl,
           pageTitle,
           userAgent: navigator.userAgent,
-          screenshot,
-          screenshotDriveUrl: null,
+          screenshots,
           timestamp: formatTimestamp(),
           tags: form.tags,
           assignees: form.assignees,
@@ -109,7 +108,7 @@ export function useBugReport(): UseBugReportReturn {
 
         // Save to local history — non-fatal if it fails
         try {
-          const thumb = screenshot ? await generateThumbnail(screenshot) : null;
+          const thumb = screenshots[0] ? await generateThumbnail(screenshots[0]) : null;
           await historyService.addEntry({
             id: crypto.randomUUID(),
             title: report.title,

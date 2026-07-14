@@ -33,13 +33,13 @@ export function App() {
   const { user } = useAuth();
   const { form, status, result, error, updateField, submit, reset } = useBugReport();
   const {
-    result: screenshotResult,
-    annotated,
-    setAnnotated,
+    items: screenshotItems,
     isCapturing,
     error: screenshotError,
     capture,
-    clear,
+    removeItem: removeScreenshot,
+    clearAll: clearScreenshots,
+    setAnnotated,
   } = useScreenshot();
   const { info: envInfo } = useEnvironment();
   const { tags: availableTags, members: availableMembers, isLoading: formDataLoading } =
@@ -71,15 +71,14 @@ export function App() {
     if (isConfigured === null) return <LoadingSpinner />;
     if (!isConfigured) return <ConfigWarningView platform={platform} />;
     if (status === 'success' && result)
-      return <SuccessView result={result} platform={platform} onReset={() => { reset(); clear(); }} />;
+      return <SuccessView result={result} platform={platform} onReset={() => { reset(); clearScreenshots(); }} />;
     if (status === 'error' && error) return <ErrorView message={error} onRetry={reset} />;
 
     return (
       <BugForm
         platform={platform}
         form={form}
-        screenshotResult={screenshotResult}
-        annotatedScreenshot={annotated}
+        screenshotItems={screenshotItems}
         isCapturing={isCapturing}
         screenshotError={screenshotError}
         isSubmitting={status === 'submitting'}
@@ -88,9 +87,12 @@ export function App() {
         formDataLoading={formDataLoading}
         onFieldChange={updateField}
         onCapture={capture}
-        onClearScreenshot={clear}
+        onRemoveScreenshot={removeScreenshot}
         onAnnotateScreenshot={setAnnotated}
-        onSubmit={() => void submit(annotated ?? screenshotResult?.dataUrl ?? null, envInfo)}
+        onSubmit={() => void submit(
+          screenshotItems.map((item) => item.annotated ?? item.result.dataUrl),
+          envInfo,
+        )}
         onSettings={openSettings}
       />
     );

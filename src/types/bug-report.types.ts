@@ -16,8 +16,7 @@ export interface BugReport {
   pageUrl: string;
   pageTitle: string;
   userAgent: string;
-  screenshot: string | null;
-  screenshotDriveUrl: string | null;
+  screenshots: string[];
   timestamp: string;
   tags: string[];
   assignees: number[];

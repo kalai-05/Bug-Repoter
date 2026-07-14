@@ -124,24 +124,25 @@ class ClickUpService {
 
     clickUpApi.setToken(config.apiToken);
 
-    // ── 1. Try Drive upload ──────────────────────────────────────────────
-    let screenshotUrl: string | null = report.screenshotDriveUrl;
+    // ── 1. Try Drive upload for each screenshot ──────────────────────────
+    const driveUrls: string[] = [];
     let attachToTask = false;
 
-    if (report.screenshot && !screenshotUrl) {
+    for (let i = 0; i < report.screenshots.length; i++) {
+      const dataUrl = report.screenshots[i];
+      if (!dataUrl) continue;
       try {
-        const driveResult = await driveService.uploadScreenshot(report.screenshot, report.pageTitle);
-        screenshotUrl = driveResult.publicUrl;
+        const driveResult = await driveService.uploadScreenshot(dataUrl, report.pageTitle);
+        driveUrls.push(driveResult.publicUrl);
         notifyUploadComplete(driveResult.fileName);
       } catch (uploadErr) {
         attachToTask = true;
-        // Silently fall through when Drive simply isn't configured (user not signed in).
-        // Only notify on genuine upload failures.
         if (!(uploadErr instanceof DriveUploadError && uploadErr.code === 'NOT_AUTHENTICATED')) {
           notifyUploadFailed(
             uploadErr instanceof DriveUploadError ? uploadErr.userMessage : undefined,
           );
         }
+        break;
       }
     }
 
@@ -150,7 +151,7 @@ class ClickUpService {
 
     const payload: import('../../types').CreateTaskPayload = {
       name: report.title,
-      description: this.buildDescription(report, screenshotUrl, attachToTask),
+      description: this.buildDescription(report, driveUrls, attachToTask),
       priority,
       tags: report.tags,
       ...(report.assignees.length > 0 ? { assignees: report.assignees } : {}),
@@ -162,14 +163,18 @@ class ClickUpService {
 
     const task = await clickUpApi.createTask(config.listId, payload);
 
-    // ── 3. Attach screenshot if Drive was unavailable ────────────────────
-    if (report.screenshot && attachToTask) {
-      try {
-        const blob = dataUrlToBlob(report.screenshot);
-        const filename = buildScreenshotFilename(report.pageTitle);
-        await clickUpApi.uploadAttachment(task.id, blob, filename);
-      } catch {
-        // Non-fatal — task was created successfully; attachment is best-effort
+    // ── 3. Attach screenshots if Drive was unavailable ───────────────────
+    if (attachToTask && report.screenshots.length > 0) {
+      for (let i = 0; i < report.screenshots.length; i++) {
+        const dataUrl = report.screenshots[i];
+        if (!dataUrl) continue;
+        try {
+          const blob = dataUrlToBlob(dataUrl);
+          const filename = buildScreenshotFilename(report.pageTitle, report.screenshots.length > 1 ? i + 1 : undefined);
+          await clickUpApi.uploadAttachment(task.id, blob, filename);
+        } catch {
+          // Non-fatal — task was created successfully; attachment is best-effort
+        }
       }
     }
 
@@ -177,7 +182,7 @@ class ClickUpService {
       taskId: task.id,
       taskUrl: task.url,
       createdAt: task.date_created,
-      screenshotUrl,
+      screenshotUrl: driveUrls[0] ?? null,
     };
   }
 
@@ -185,7 +190,7 @@ class ClickUpService {
 
   private buildDescription(
     report: BugReport,
-    screenshotUrl: string | null,
+    driveUrls: string[],
     attachedToTask: boolean,
   ): string {
     const env = report.environmentInfo;
@@ -227,16 +232,16 @@ class ClickUpService {
       sections.push(envLines.join('\n'));
     }
 
-    // ── Screenshot Link ───────────────────────────────────────────────────
-    if (screenshotUrl) {
+    // ── Screenshot Links ──────────────────────────────────────────────────
+    if (driveUrls.length > 0) {
       sections.push(
-        '## Screenshot Link',
-        screenshotUrl,
+        '## Screenshots',
+        driveUrls.map((url, i) => `${driveUrls.length > 1 ? `${i + 1}. ` : ''}${url}`).join('\n'),
       );
     } else if (attachedToTask) {
       sections.push(
-        '## Screenshot Link',
-        '_Screenshot attached directly to this task._',
+        '## Screenshots',
+        `_${report.screenshots.length > 1 ? `${report.screenshots.length} screenshots attached` : 'Screenshot attached'} directly to this task._`,
       );
     }
 

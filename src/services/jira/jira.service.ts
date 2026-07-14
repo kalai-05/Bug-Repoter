@@ -13,20 +13,23 @@ class JiraService {
       throw new Error('Jira is not configured. Open Settings to add your credentials.');
     }
 
-    // ── 1. Try Drive upload ──────────────────────────────────────────────
-    let screenshotUrl: string | null = null;
+    // ── 1. Try Drive upload for each screenshot ──────────────────────────
+    const driveUrls: string[] = [];
     let attachToIssue = false;
 
-    if (report.screenshot) {
+    for (let i = 0; i < report.screenshots.length; i++) {
+      const dataUrl = report.screenshots[i];
+      if (!dataUrl) continue;
       try {
-        const driveResult = await driveService.uploadScreenshot(report.screenshot, report.pageTitle);
-        screenshotUrl = driveResult.publicUrl;
+        const driveResult = await driveService.uploadScreenshot(dataUrl, report.pageTitle);
+        driveUrls.push(driveResult.publicUrl);
         notifyUploadComplete(driveResult.fileName);
       } catch (err) {
         attachToIssue = true;
         if (!(err instanceof DriveUploadError && err.code === 'NOT_AUTHENTICATED')) {
           notifyUploadFailed(err instanceof DriveUploadError ? err.userMessage : undefined);
         }
+        break;
       }
     }
 
@@ -60,10 +63,10 @@ class JiraService {
       lines.push('== Environment ==', ...envParts, '');
     }
 
-    if (screenshotUrl) {
-      lines.push('== Screenshot ==', screenshotUrl, '');
+    if (driveUrls.length > 0) {
+      lines.push('== Screenshots ==', ...driveUrls.map((url, i) => driveUrls.length > 1 ? `${i + 1}. ${url}` : url), '');
     } else if (attachToIssue) {
-      lines.push('== Screenshot ==', 'Attached to this issue.', '');
+      lines.push('== Screenshots ==', `${report.screenshots.length > 1 ? `${report.screenshots.length} screenshots` : 'Screenshot'} attached to this issue.`, '');
     }
 
     if (report.createdBy) lines.push(`Created by: ${report.createdBy}`);
@@ -79,14 +82,18 @@ class JiraService {
 
     const taskUrl = `${config.baseUrl.replace(/\/$/, '')}/browse/${issue.key}`;
 
-    // ── 4. Attach screenshot ─────────────────────────────────────────────
-    if (report.screenshot && attachToIssue) {
-      try {
-        const blob = dataUrlToBlob(report.screenshot);
-        const filename = buildScreenshotFilename(report.pageTitle);
-        await uploadJiraAttachment(config, issue.key, blob, filename);
-      } catch {
-        // Non-fatal
+    // ── 4. Attach screenshots ────────────────────────────────────────────
+    if (attachToIssue && report.screenshots.length > 0) {
+      for (let i = 0; i < report.screenshots.length; i++) {
+        const dataUrl = report.screenshots[i];
+        if (!dataUrl) continue;
+        try {
+          const blob = dataUrlToBlob(dataUrl);
+          const filename = buildScreenshotFilename(report.pageTitle, report.screenshots.length > 1 ? i + 1 : undefined);
+          await uploadJiraAttachment(config, issue.key, blob, filename);
+        } catch {
+          // Non-fatal
+        }
       }
     }
 
@@ -94,7 +101,7 @@ class JiraService {
       taskId: issue.key,
       taskUrl,
       createdAt: new Date().toISOString(),
-      screenshotUrl,
+      screenshotUrl: driveUrls[0] ?? null,
     };
   }
 }

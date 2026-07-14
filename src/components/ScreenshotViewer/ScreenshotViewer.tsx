@@ -19,12 +19,15 @@ function formatBytes(bytes: number): string {
 
 export interface ScreenshotViewerProps {
   result: ScreenshotResult;
+  /** Override the displayed image (e.g. annotated version) */
+  displayUrl?: string;
   onClose: () => void;
-  onRetake: () => void;
+  onRetake?: () => void;
   onDelete: () => void;
+  onAnnotate?: () => void;
 }
 
-export function ScreenshotViewer({ result, onClose, onRetake, onDelete }: ScreenshotViewerProps) {
+export function ScreenshotViewer({ result, displayUrl, onClose, onRetake, onDelete, onAnnotate }: ScreenshotViewerProps) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [withTransition, setWithTransition] = useState(false);
@@ -195,7 +198,7 @@ export function ScreenshotViewer({ result, onClose, onRetake, onDelete }: Screen
         onDoubleClick={resetView}
       >
         <img
-          src={result.dataUrl}
+          src={displayUrl ?? result.dataUrl}
           alt={`Screenshot${result.width > 0 ? ` — ${result.width} × ${result.height}` : ''}`}
           draggable={false}
           style={{
@@ -224,28 +227,37 @@ export function ScreenshotViewer({ result, onClose, onRetake, onDelete }: Screen
         className="flex items-center h-12 px-3 gap-3 shrink-0"
         style={{ background: '#18182A', borderTop: '1px solid rgba(255,255,255,0.08)' }}
       >
-        {/* Retake */}
-        <button
-          onClick={onRetake}
-          className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 active:opacity-70 shrink-0"
-          style={{ background: '#5B5FCF' }}
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        {/* Annotate */}
+        {onAnnotate && (
+          <button
+            onClick={onAnnotate}
+            className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 active:opacity-70 shrink-0"
+            style={{ background: '#5B5FCF' }}
           >
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-          </svg>
-          Retake
-        </button>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            Annotate
+          </button>
+        )}
+
+        {/* Retake */}
+        {onRetake && (
+          <button
+            onClick={onRetake}
+            className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold shrink-0 transition-colors"
+            style={{ color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.08)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            Retake
+          </button>
+        )}
 
         {/* Metadata */}
         <div className="flex-1 flex items-center justify-center gap-1.5 overflow-hidden">

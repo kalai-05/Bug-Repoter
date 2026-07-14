@@ -38,10 +38,11 @@ export function priorityLabel(priority: BugPriority): string {
   return labels[priority];
 }
 
-export function buildScreenshotFilename(pageTitle: string): string {
+export function buildScreenshotFilename(pageTitle: string, index?: number): string {
   const sanitized = pageTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   const timestamp = Date.now();
-  return `bug_screenshot_${sanitized}_${timestamp}.png`;
+  const suffix = index !== undefined ? `_${index}` : '';
+  return `bug_screenshot_${sanitized}${suffix}_${timestamp}.png`;
 }
 
 export function dataUrlToBlob(dataUrl: string): Blob {
